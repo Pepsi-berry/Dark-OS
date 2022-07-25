@@ -31,6 +31,8 @@ int main(int argc,char *argv[])
         gameMemory(argv[2][0]-'0', random);
     else if(strcmp(argv[1], "maze") == 0 && argc == 4)
         gameMaze(argv[2][0]-'0', random);
+    else if(strcmp(argv[1], "sokoban") == 0 && argc == 3)
+        gameSokoban(random);
     else if(strcmp(argv[1], "help") == 0)
         showHelp();
     else if(strcmp(argv[1], "clear") == 0)
@@ -67,8 +69,8 @@ int showHelp()
 	printf("      #           $ echo clear        |   clear the cmd                     #\n");
 	printf("      #           $ echo memory num   |   Enter memory game                 #\n");
 	printf("      #           $ echo maze num     |   Enter maze game                   #\n");
+	printf("      #           $ echo sokoban      |   Enter sokoban game                #\n");
 	printf("      #            The higner the num, the higher the difficulty            #\n");
-	printf("      #           You can use [CTRL + F1/F2/F3] to switch consoles          #\n");
 	printf("      =======================================================================\n");
 
     //printf("\n\n");
@@ -184,8 +186,6 @@ void updateMemoryView(int degree, char shadow[])
 	for(int i = 0; i + degree < 15 ;i++)
 		printf("\n");
 }
-
-static int Rank = 2;
 
 int gameMaze(int degree, int random)
 {
@@ -355,6 +355,217 @@ void updateMazeView(int degree, char maze[])
     printf("By the way, you can 'q' to kick your self out when you want to cry.\n");
 
     return;
+}
+
+const int sokobanMap1[9][11] = {
+	{0,1,1,1,1,1,1,1,1,1,0},
+	{0,1,0,0,0,1,0,0,0,1,0},
+	{0,1,0,3,3,3,3,3,0,1,0},
+	{0,1,0,3,0,3,0,3,0,1,1},
+	{0,1,0,0,0,2,0,0,3,0,1},
+	{1,1,0,1,1,1,1,0,3,0,1},
+	{1,0,4,4,4,4,4,1,0,0,1},
+	{1,0,4,4,4,4,4,0,0,1,1},
+	{1,1,1,1,1,1,1,1,1,1,0}
+	};//原始的图表，五行六列，其中 0 代表着空白的地方； 1 代表着墙；2 代表着人；
+	              //3 代表着箱子；4 代表着箱子的中点位置。 
+
+void gameSokoban(int random)
+{
+    //init sokoban map
+    int map[9][11] = {
+	{0,0,1,1,1,1,1,0,0,0,0},
+	{1,1,1,0,0,0,1,0,0,0,0},
+	{1,4,2,3,0,0,1,0,0,0,0},
+	{1,1,1,0,3,4,1,0,0,0,0},
+	{1,4,1,1,3,0,1,0,0,0,0},
+	{1,0,1,0,4,0,1,1,0,0,0},
+	{1,3,0,7,3,3,4,1,0,0,0},
+	{1,0,0,0,4,0,0,1,0,0,0},
+	{1,1,1,1,1,1,1,1,0,0,0}
+	};
+    int maxX = 11;
+    //printf("sokoban!\n");
+    char rdbuf[4];
+	int rd_len = 0;
+
+    while(1)
+    {
+        updateSodobanView(map, maxX);
+        printf("Input the direction you want to go(W, A, S, D): ");
+        rd_len = read(0, rdbuf, 1);
+        rdbuf[rd_len] = 0;
+        if(rdbuf[0] == 'q')
+        {
+            printf("yeah, agian, you really like giving up.\n");
+            break;
+        }
+
+        updateSodobanStatus(map, maxX, rdbuf[0]);
+
+        if(1 == detectEnd(map, maxX))
+        {
+            printf("Congratulation for your last winning!\n");
+            break;
+        }
+    }
+
+}
+
+void updateSodobanView(int map[9][11], int maxX)
+{
+    for(int i = 0; i < 16 ;i++)
+		printf("\n");
+
+    for(int i = 0; i < 9; i++)
+	{
+	   for(int j = 0; j < maxX; j++)
+	   	   {
+	   	   	   switch(map[i][j])
+	   	   	   {
+	   	   	   	    case 0:
+	   	   	   	    	printf(" "); //空白的地方
+	   	   	   	    	break;
+	   	   	   	    case 1:
+	   	   	   	    	printf("#"); //墙 
+	   	   	   	    	break;
+	   	   	   	    case 2:
+	   	   	   	    	printf("Y"); //人 
+					    break;
+					case 3:
+						printf("*"); //箱子 
+					    break;
+				    case 4:
+				    	printf("x"); //终点地方 
+					     break; 
+					case 6:
+						printf("Y");//人加终点位置 
+						break;
+				    case 7: 
+					    printf("o") ;//箱子加终点位置
+						break;
+					 }
+			}
+	   printf("\n");
+	}
+}
+
+void updateSodobanStatus(int map[9][11], int maxX, char cmd)
+{
+	int count,caw;//行和列 
+	for(int i=0;i<9;i++)//确定人的位置 
+	{
+		for (int j=0;j<11;j++)
+		{
+			if(map[i][j]==2||map[i][j]==6)
+			{
+				count=i;
+				caw=j;
+			}
+		}
+	}
+
+    switch(cmd)
+	{//上
+	case 'W':
+			// 1.人的前面是空地；
+		    // 2.人的前面是终点位置；
+			// 3.人的前面是箱子
+		    //3.1.箱子的前面是空地；
+			//3.2.箱子的前面是终点位置。
+		if(map[count-1][caw]==0||map[count-1][caw]==4)
+		{
+			map[count][caw]-=2;
+			map[count-1][caw]+=2;
+		} 
+		else if(map[count-1][caw]==3||map[count-1][caw]==7)
+		{
+			if(map[count-2][caw]==0||map[count-2][caw]==4)
+			{
+			    map[count][caw]-=2;
+				map[count-1][caw]-=1;
+				map[count-2][caw]+=3;
+			}
+		}
+		break;
+	
+   	/* 移动的情况：
+	位置：
+	   人   map[count][caw]
+	   人的前面是空地   map[count-1][caw]
+	   人的前面是终点位置   map[count-1][caw]
+	   箱子的前面是空地或终点位置  map[count-2][caw]*/ 
+		
+//下 
+	    case 'S':
+	    	if(map[count+1][caw]==0||map[count+1][caw]==4)
+			{
+				map[count][caw]-=2;
+				map[count+1][caw]+=2;
+			}
+		
+			else if(map[count+2][caw]==0||map[count+2][caw]==4)
+			{
+			   	if(map[count+1][caw]==3||map[count+1][caw]==7)
+				{
+			      map[count][caw]-=2;
+				  map[count+1][caw]-=1;
+				  map[count+2][caw]+=3;
+				}
+			}
+			break;
+//左 
+	    case 'A':
+	    	if(map[count][caw-1]==0||map[count][caw-1]==4)
+			{
+				map[count][caw]-=2;
+				map[count][caw-1]+=2;
+			}
+		
+			else if(map[count][caw-2]==0||map[count][caw-2]==4)
+			{
+			   	if(map[count][caw-1]==3||map[count][caw-1]==7)
+				{
+			      map[count][caw]-=2;
+				  map[count][caw-1]-=1;
+				  map[count][caw-2]+=3;
+				}
+			}
+        	break;
+//右 
+	    case 'D':
+		    if(map[count][caw+1]==0||map[count][caw+1]==4)
+			{
+				map[count][caw]-=2;
+				map[count][caw+1]+=2;
+			}
+		
+			else if(map[count][caw+2]==0||map[count][caw+2]==4)
+			{
+			     if(map[count][caw+1]==3||map[count][caw+1]==7)
+				{
+			      map[count][caw]-=2;
+				  map[count][caw+1]-=1;
+				  map[count][caw+2]+=3;
+				}
+			}
+		    break;
+    }
+}
+
+int detectEnd(int map[9][11], int maxX) 
+{
+	int k=0;
+	for(int i=0;i<9;i++)
+	{
+		for (int j=0;j<maxX;j++)
+		{
+			 if(map[i][j]==3)
+			     return 0;
+		}
+	}
+
+    return 1;
 }
 
 void delay(int time)

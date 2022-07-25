@@ -73,6 +73,8 @@ int do_cd()
 		}
 		else
 		{
+			if(new_inodenum)
+				put_inode(new_inode);
 			//printl("NO folder found to enter\n");
 			returnnum = -2;
 		}

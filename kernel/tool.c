@@ -161,6 +161,7 @@ void processManager(int fd_stdin, int fd_stdout)
 	int rd_len = 0;
 	char rdbuf[64];
 	char order[7 + 1];
+	char* nullstd = "NULL";
 	char* content = "NULL";
 	while(1)
 	{
@@ -185,6 +186,11 @@ void processManager(int fd_stdin, int fd_stdout)
 		else if(0 == strcmp(order, "create"))
 		{
 			createProcess();
+		}
+		else if(0 == strcmp(order, "kill"))
+		{
+			char* content = getcontent(rdbuf, nullstd, 4, rd_len);
+			killProcess((int)(content[0] - '0'));
 		}
 	}
 }
@@ -211,7 +217,6 @@ void respond(char *order, char *rdbuf, char* dir, int fd_stdin, int fd_stdout, i
 		printf("%s", ls());
 		printf("*\n");
 		printf("-----------------------------\n");
-		printf("Think carefully! You loser!\n");
 	}
 	else if(!strcmp(order, "touch"))
 	{
@@ -224,7 +229,7 @@ void respond(char *order, char *rdbuf, char* dir, int fd_stdin, int fd_stdout, i
 			if(-1 != fd && -2 != fd)
 				close(fd);
 			if(-2 == fd)
-				printf("I am here with you\n");
+				printf("{FS} file exists: %s\n",content);
 		}
 	}
 	else if(!strcmp(order, "mdir"))
@@ -238,7 +243,7 @@ void respond(char *order, char *rdbuf, char* dir, int fd_stdin, int fd_stdout, i
 			if(-1 != fd && -2 != fd)
 				close(fd);
 			if(-2 == fd)
-				printf("I am here with you\n");
+				printf("{FS} file exists: %s\n",content);
 		}
 	}
 	else if(!strcmp(order, "cd"))
@@ -280,7 +285,7 @@ void respond(char *order, char *rdbuf, char* dir, int fd_stdin, int fd_stdout, i
 		{
 			int fd = open(content, O_RDWR);
 			if(-1 == fd)
-				printf("No corresponding file found");
+				printf("No corresponding file found\n");
 			else
 			{
 				close(fd);

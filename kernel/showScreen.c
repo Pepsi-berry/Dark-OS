@@ -39,7 +39,7 @@ void CommandList()
 	printf("      #            $ mdir [name]   --- make new folder                   #\n");
 	printf("      #            $ cd [folder]   --- enter a folder                    #\n");
 	printf("      #            $ ls            --- show all files in current folder  #\n");
-	printf("      #            $ proce         --- process manager                   #\n");
+	printf("      #            $ pm            --- process manager                   #\n");
 	printf("      #                                                                  #\n");
 	printf("      #            You can use [CTRL + F1/F2/F3] to switch consoles      #\n");
 	printf("      #                                                                  #\n");

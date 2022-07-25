@@ -15,7 +15,7 @@ everything: $(BIN)
 install : all clean
 	cp ../kernel.bin ./ -v
 	tar vcf inst.tar kernel.bin $(BIN)
-	dd if=inst.tar of=$(HD) seek=27131392 bs=1 count=112640 conv=notrunc
+	dd if=inst.tar of=$(HD) seek=27131392 bs=1 count=122880 conv=notrunc
 
 all : realclean everything
 

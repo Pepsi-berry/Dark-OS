@@ -87,6 +87,7 @@ char* ls();
 /*lib/pm.c*/
 void showProcess();
 void createProcess();
+void killProcess(int pid);
 
 /* lib/unlink.c */
 int unlink(const char *);

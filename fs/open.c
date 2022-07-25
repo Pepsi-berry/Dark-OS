@@ -63,7 +63,7 @@ int do_open()
             pin = create_file(pathname,flags);
         else
         {
-            printl("{FS} file not exists: %s\n",pathname);
+            //printl("{FS} file not exists: %s\n",pathname);
             return -1;
         }
         
@@ -74,8 +74,8 @@ int do_open()
         if ((flags & O_CREAT) && (!(flags & O_TRUNC)))
         {
             //assert(flags == (O_RDWR | O_CREAT));
-            printl("{FS} file exists: %s\n",pathname);
-            return -1;
+            //printl("{FS} file exists: %s\n",pathname);
+            return -2;
         }
         assert((flags == O_RDWR         ) || 
                 (flags == (O_RDWR | O_TRUNC)) || 
@@ -91,8 +91,8 @@ int do_open()
     }
     else
     {
-        printl("{FS} file exists: %s\n",pathname);
-        return -1;
+        //printl("{FS} file exists: %s\n",pathname);
+        return -2;
     }
     
     if (flags & O_TRUNC)

@@ -41,9 +41,30 @@ void showProcess()
 	printf("===============================================================================\n\n");
 }
 
-void killProcess()
+void killProcess(int pid)
 {
-	;
+	//对输入进行判断和分类处理，维护健壮性
+	if (pid >= NR_TASKS + NR_PROCS || pid < 0)
+	{
+		printf("The pid exceeded the range\n");
+	}
+	else if (pid < NR_TASKS)
+	{
+		printf("System tasks cannot be killed.\n");
+	}
+	else if (proc_table[pid].p_flags == FREE_SLOT)
+	{
+		printf("Process not found.\n");
+	}
+	else
+	{
+		//proc_table[pid].priority = 0;
+		proc_table[pid].p_flags = FREE_SLOT;
+		printf("Aim process is killed.\n");
+	}
+
+	showProcess();
+
 }
 
 void createProcess()
@@ -52,11 +73,11 @@ void createProcess()
 
 	if (pid != 0)
     {
-        printf("[parent is running, child pid:%d\n]", pid);
+        printf("[parent is running, child pid:%d]\n", pid);
         proc_table[pid].pid = pid;
 		int s = 0;
 		int child = wait(&s);
-        printf("[Child %d exited with status: %d.\n]", child, s);
+        printf("[Child %d exited with status: %d.]\n", child, s);
     }
     else 
     {
